@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,16 @@ namespace MatrixMul.IBMCloud
             _accessKey = input["s3_access_key"].ToString();
             _secretKey = input["s3_secret_key"].ToString();
 
+            Console.WriteLine($"{_bucketName}@{_endpoint}: A: {_accessKey} S: {_secretKey}");
+
             _client = new MinioClient(_endpoint, _accessKey, _secretKey);
+
+            var r = _client.BucketExistsAsync(_bucketName);
+            Task.WaitAll(r);
+            if (!r.Result)
+            {
+                Task.WaitAll(_client.MakeBucketAsync(_bucketName, ""));
+            }
         }
 
         public S3Repository(string bucketName, string endpoint, string accessKey, string secretKey)
@@ -40,11 +50,12 @@ namespace MatrixMul.IBMCloud
 
         public void StoreCalculation(string id, MatrixCalculation calculation)
         {
-//            var data = JsonConvert.SerializeObject(calculation);
-//            var ms = new MemoryStream();
-//            ms.Write(Encoding.UTF8.GetBytes(data));
-//            ms.Seek(0, SeekOrigin.Begin);
-//            Task.WaitAll(_client.PutObjectAsync(_bucketName, id, ms, ms.Length));
+            Console.WriteLine("Attempting to store config in object storage");
+            var data = JsonConvert.SerializeObject(calculation);
+            var ms = new MemoryStream();
+            ms.Write(Encoding.UTF8.GetBytes(data));
+            ms.Seek(0, SeekOrigin.Begin);
+            Task.WaitAll(_client.PutObjectAsync(_bucketName, id, ms, ms.Length));
         }
 
         public MatrixCalculation GetCalculation(string id)
@@ -62,52 +73,88 @@ namespace MatrixMul.IBMCloud
 
         public void StoreResultMatrix(string id, Matrix matrix)
         {
-            throw new System.NotImplementedException();
+            var data = JsonConvert.SerializeObject(matrix);
+            var ms = new MemoryStream();
+            ms.Write(Encoding.UTF8.GetBytes(data));
+            ms.Seek(0, SeekOrigin.Begin);
+            Task.WaitAll(_client.PutObjectAsync(_bucketName, GetResultKey(id), ms, ms.Length));
         }
 
         public Matrix GetResultMatrix(string id)
         {
-            throw new System.NotImplementedException();
+            var ms = new MemoryStream();
+            Task.WaitAll(_client.GetObjectAsync(_bucketName, GetResultKey(id), (e) => e.CopyTo(ms)));
+
+            return JsonConvert.DeserializeObject<Matrix>(Encoding.UTF8.GetString(ms.ToArray()));
         }
 
         public bool HasResultMatrix(string id)
         {
-            throw new System.NotImplementedException();
+            return true;
         }
 
         public void DeleteResultMatrix(string id)
         {
-            throw new System.NotImplementedException();
+            Task.WaitAll(_client.RemoveObjectAsync(_bucketName, GetResultKey(id)));
         }
 
         public void StoreComputationTasksForWorker(string id, int workerId, ComputationTask[] tasks)
         {
-            throw new System.NotImplementedException();
+            var data = JsonConvert.SerializeObject(tasks);
+            var ms = new MemoryStream();
+            ms.Write(Encoding.UTF8.GetBytes(data));
+            ms.Seek(0, SeekOrigin.Begin);
+            Task.WaitAll(_client.PutObjectAsync(_bucketName, GetTaskKeyForWorker(id, workerId), ms, ms.Length));
         }
 
         public ComputationTask[] GetComputationTasksForWorker(string id, int workerId)
         {
-            throw new System.NotImplementedException();
+            var ms = new MemoryStream();
+            Task.WaitAll(_client.GetObjectAsync(_bucketName, GetTaskKeyForWorker(id, workerId), (e) => e.CopyTo(ms)));
+
+            return JsonConvert.DeserializeObject<ComputationTask[]>(Encoding.UTF8.GetString(ms.ToArray()));
         }
 
         public void DeleteComputationTasks(string id, int workerId)
         {
-            throw new System.NotImplementedException();
+            Task.WaitAll(_client.RemoveObjectAsync(_bucketName, GetTaskKeyForWorker(id, workerId)));
         }
 
-        public void StoreComputationResults(string id, int worker, ComputationResult[] results)
+        public void StoreComputationResults(string id, int workerId, ComputationResult[] results)
         {
-            throw new System.NotImplementedException();
+            var data = JsonConvert.SerializeObject(results);
+            var ms = new MemoryStream();
+            ms.Write(Encoding.UTF8.GetBytes(data));
+            ms.Seek(0, SeekOrigin.Begin);
+            Task.WaitAll(_client.PutObjectAsync(_bucketName, GetResultKeyForWorker(id, workerId), ms, ms.Length));
         }
 
-        public ComputationResult[] GetComputationResults(string id, int worker)
+        public ComputationResult[] GetComputationResults(string id, int workerId)
         {
-            throw new System.NotImplementedException();
+            var ms = new MemoryStream();
+            Task.WaitAll(_client.GetObjectAsync(_bucketName, GetResultKeyForWorker(id, workerId), (e) => e.CopyTo(ms)));
+
+            return JsonConvert.DeserializeObject<ComputationResult[]>(Encoding.UTF8.GetString(ms.ToArray()));
         }
 
-        public void DeleteComputationResults(string id, int workerid)
+        public void DeleteComputationResults(string id, int workerId)
         {
-            throw new System.NotImplementedException();
+            Task.WaitAll(_client.RemoveObjectAsync(_bucketName, GetResultKeyForWorker(id, workerId)));
+        }
+
+        private static string GetResultKey(string id)
+        {
+            return $"{id}_result";
+        }
+
+        private static string GetTaskKeyForWorker(string id, int workerId)
+        {
+            return $"{id}_tasks_worker_{workerId}";
+        }
+
+        private static string GetResultKeyForWorker(string id, int workerId)
+        {
+            return $"{id}_results_worker_{workerId}";
         }
     }
 }

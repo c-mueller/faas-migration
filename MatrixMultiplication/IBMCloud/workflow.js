@@ -76,7 +76,15 @@ module.exports = composer.seq(
             }),
             "build-result"
         ),
-        "serial-multiply"
+        composer.seq(
+            composer.action("zero-out-worker-count", {
+                action: function (data) {
+                    data.worker_count = 5;
+                    return data;
+                }
+            }),
+            "serial-multiply"
+        )
     ),
     "generate-report"
 );
