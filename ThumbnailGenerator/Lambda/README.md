@@ -11,6 +11,13 @@ mvn clean package
 
 ## Deploying
 
+Before deploying you might want to modify the names of the buckets in the `serverless.yml` to ensure they are unique:
+```yaml
+custom:
+  image_bucket_name: <Name of the Input Bucket>
+  thumb_bucket_name: <Name of the Output Bucket>
+```
+
 After the code has been built it can be deployed by running:
 ```
 serverless deploy -v
