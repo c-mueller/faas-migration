@@ -128,7 +128,7 @@ func (endpoint api) GetItem(s string) (*ToDoItem, error) {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		return nil, errors.New(fmt.Sprintf("API returned status code: %s instead of 200", res.StatusCode))
+		return nil, errors.New(fmt.Sprintf("API returned status code: %d instead of 200", res.StatusCode))
 	}
 	data, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -330,7 +330,7 @@ func (endpoint api) CheckFunctionsNotFoundBehaviour() {
 		fmt.Printf("Fail!\nExpected Error. Got None.\n")
 		os.Exit(1)
 	}
-	fmt.Println("Ok Got error: %s!", err.Error())
+	fmt.Printf("Ok Got error: %s!\n", err.Error())
 }
 
 // -----------------------------------------------------------------------------
