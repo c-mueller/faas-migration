@@ -1,4 +1,4 @@
-# Genral Azure Deployment Guide
+# General Azure Deployment Guide
 
 This Guide applies to all Azure implmentations in C#. More Specifilally the ToDo API and the MatrixMultiplication
 
