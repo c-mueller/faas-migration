@@ -3,6 +3,24 @@
 This Guide applies to all Azure implmentations in C#. More Specifilally the ToDo API and the MatrixMultiplication
 
 
+## Prerequisites
+
+The following commands are requried to deploy and run this use-case
+
+- Azure CLI
+- Azure Functions Core Tools
+- .NET Core SDK Version 2.1
+
+We assumed that the login using `az login` was successful.
+
+Only when working with make:
+- Linux based environment (Others are untested!)
+- `jq`
+- `make`
+- `sponge` (moreutils)
+- A Previously created Resource Group
+
+
 ### Variant 1: Using `make`
 
 #### Step 1: Customizing `Makefile`
@@ -47,16 +65,42 @@ func host start
 After you called the make command once, ensuring the resources and the configuration is written.
 
 On the function host is up and running the Application is accessible on http://localhost:7071/
-To trigger a Calculation you can call http://localhost:7071/api/TriggerMatrixMultiplication
-For more information how parameters are passed over, please take a look at the "Starting a Multiplication"section.
 
 
-### Variant 2: Using Rider
+### Deploy using JetBrains Rider
 
-To deploy the function just run
-```
-make deploy
-```
+Apart from the Azure CLI and the Azure Functions Core Tools this approach also requires the Azure Toolkit for Rider.
 
-This will create all resources and will deploy the function after bulding it.
-This also writes the local configuration allowing local execution using `func host start`
+#### Step 1: Sign Into Azure in Rider
+First double press Shift to open the Command Window. There search for 'Sign in', Select the "Sign into Azure" option and press Enter.
+
+Next the follwoing window is shown. When using Device Login you will have to sign in to azure using your browser. Access is for Rider is granted by Pasting a code. Similiar to the login process for the Azure CLI
+![](https://i.imgur.com/x8bzXz8.png)
+
+Once signed in slect the subscriptions you want to use.
+![](https://i.imgur.com/nrb1utu.png)
+
+#### Step 2: Creating the Deployment Configuration
+
+On the Top Right slect the Menu left to the Play Button (Usually named "Default"). Click on it and select "Edit Configurations"
+![](https://i.imgur.com/ZCsZLLP.png)
+Click the "+" on the top left and select "Publish Function App"
+![](https://i.imgur.com/uGX9Iv4.png)
+Next select the options accordingly. As a Example a configuration to create all required resources is shown in the following screenshot.
+![](https://i.imgur.com/wMi4il8.png)
+Once done Close the window by Clicking OK
+
+#### Step 3: Deploying
+Now Ensure your deployment configuration is selected (it should by default) and click the run button
+![](https://i.imgur.com/gUPwBWb.png)
+
+The console output on the bottom shows the progress of the deployment.
+![](https://i.imgur.com/kid8wVq.png)
+After some time it should look like this:
+![](https://i.imgur.com/MLgOLGJ.png)
+
+#### Step 4: Updating the Deployment
+
+To update the deployment just rerun the deployment configuration.
+
+
