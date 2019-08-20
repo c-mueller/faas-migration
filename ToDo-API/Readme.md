@@ -12,3 +12,24 @@ go run *.go -endpoint <API Endpoint>
 
 The tests assume the implemeńtation you want to test is already deployed. To do so follow the instructions in the directories of the
 implementations.
+
+## API Specification
+
+The ToDo API Consists of the following functions:
+
+- `POST /put`: Submit an Item to the API
+- `GET /get`: Get an Item
+- `GET /lst`: List all Items
+- `POST /done`: Mark an Item as Done
+- `POST /del`: Delete an Item
+
+All Methods produce JSON responses and accept JSON requests.
+
+### `/put` Function
+
+The `/put` function consumes an ItemCreation Request
+
+### ToDo Item
+
+
+### ItemCreation Request
