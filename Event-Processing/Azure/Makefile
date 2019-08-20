@@ -16,6 +16,8 @@ APPINSIGHTS_NAME := krnlfuncai
 FUNCTION_APP_NAME := krnlfuncapp
 EVT_HUB_NAME := krnlevthub
 
+########################################################################################################
+
 # CONFIG DERIVATIONS
 MYSQL_HOSTNAME := $(MYSQL_SERVER_NAME).mysql.database.azure.com
 MYSQL_USERNAME := $(MYSQL_ADMIN_USERNAME)@$(MYSQL_SERVER_NAME)
@@ -57,7 +59,7 @@ create_function_app:
 	az resource create -g $(RESOURCE_GROUP_NAME) -n $(APPINSIGHTS_NAME) --resource-type "Microsoft.Insights/components" --properties '{"Application_Type":"web"}'
 	az functionapp create -g $(RESOURCE_GROUP_NAME) -n $(FUNCTION_APP_NAME) --storage-account $(STORAGE_ACCOUNT_NAME) --consumption-plan-location $(AZURE_REGION) --app-insights $(APPINSIGHTS_NAME) --runtime node
 
-create_resources: create_storage_account create_mysql create_service_bus create_function_app
+create_resources: create_storage_account create_mysql create_service_bus
 
 create_config: STORAGE_ACCOUNT_CONNECTION_STRING := `az storage account show-connection-string --name $(STORAGE_ACCOUNT_NAME) | jq -r '.connectionString'`
 create_config: SERVICE_BUS_CONNECTION_STRING := `az servicebus namespace authorization-rule keys list -g $(RESOURCE_GROUP_NAME) --namespace-name $(EVT_HUB_NAME) --name RootManageSharedAccessKey | jq -r '.primaryConnectionString'`
@@ -71,3 +73,17 @@ create_config: create_resources
 	jq ".Values.DBEndpoint = \"$(MYSQL_HOSTNAME)\"" local.settings.json | sponge local.settings.json
 	jq ".Values.DBUsername = \"$(MYSQL_USERNAME)\"" local.settings.json | sponge local.settings.json
 	jq ".Values.DBPassword = \"$(MYSQL_ADMIN_PASSWORD)\"" local.settings.json | sponge local.settings.json
+
+install:
+	npm install
+
+run_local: create_config install
+	func host start
+
+deploy: create_config create_function_app install
+	func azure functionapp publish $(FUNCTION_APP_NAME)
+	func azure functionapp publish $(FUNCTION_APP_NAME) -o
+
+update: install
+	func azure functionapp publish $(FUNCTION_APP_NAME)
+	func azure functionapp publish $(FUNCTION_APP_NAME) -o
