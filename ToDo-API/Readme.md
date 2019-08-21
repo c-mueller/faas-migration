@@ -37,6 +37,7 @@ All Methods produce JSON responses and accept JSON requests.
 The `/put` function consumes an ItemCreation Request as JSON and returns a ToDo Item with an ID as a JSON Response.
 
 It can produce the following HTTP status codes:
+
 - 200: Item was pushed successfuly
 - 400: Invalid Input
 - 500: Server Error
@@ -48,6 +49,7 @@ No Query Parameters are set.
 Returns a JSON array of all ToDO items in the database. The Returned body is a JSON array.
 
 This function Produces the following status codes:
+
 - 200: Sucess, the Item is the returned body
 - 500: Server Error
 
@@ -56,6 +58,7 @@ This function Produces the following status codes:
 Returns a specific ToDo Item based on the `id` query parameter. This parameter defines the id of the item that sould be looked for.
 
 This function Produces the following status codes:
+
 - 200: Sucess, the Item is the returned body
 - 400: The `id` is not set
 - 404: The given ID was invalid
@@ -67,6 +70,7 @@ Deletes a specific ToDo Item based on the `id` query parameter. This parameter d
 The body this function has to return is not defined.
 
 This function Produces the following status codes:
+
 - 200: Sucess, the Item was deleted
 - 400: The `id` is not set
 - 404: The given ID was invalid
@@ -78,12 +82,14 @@ Marks a a specific ToDo Item as done based on the `id` query parameter. This par
 The body this function has to return is not defined.
 
 This function Produces the following status codes:
+
 - 200: Sucess, the Item was deleted
 - 400: The `id` is not set
 - 404: The given ID was invalid
 
-### ToDo Item
+The `/put` function consumes an ItemCreation Request
 
+### ToDo Item
 
 ```json
 {
